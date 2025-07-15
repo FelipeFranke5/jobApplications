@@ -16,7 +16,7 @@ public class MySqlQuery implements DatabaseQuery {
 
     @Override
     public List<JobApplication> getJobApplicationsByCompanyName(Connection connection, String companyName) {
-        VALIDATOR.checkConnectionIsValid(connection);
+        VALIDATOR.checkConnection(connection);
         VALIDATOR.checkCompanyNameInQuery(companyName);
         try (PreparedStatement preparedStatement = connection.prepareStatement(filterByCompanyNameSqlString())) {
             return getJobApplications(companyName, preparedStatement);
@@ -27,7 +27,7 @@ public class MySqlQuery implements DatabaseQuery {
 
     @Override
     public void insertJobApplication(Connection connection, JobApplication jobApplication) {
-        VALIDATOR.checkConnectionIsValid(connection);
+        VALIDATOR.checkConnection(connection);
         VALIDATOR.checkJobApplicationIsValid(jobApplication);
         var sql = insertJobApplicationSqlString(jobApplication);
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
