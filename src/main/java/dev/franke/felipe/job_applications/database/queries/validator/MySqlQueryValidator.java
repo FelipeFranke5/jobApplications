@@ -6,6 +6,7 @@ import dev.franke.felipe.job_applications.database.exception.SqlExecutionExcepti
 import dev.franke.felipe.job_applications.domain.JobApplication;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.regex.Pattern;
 
@@ -22,27 +23,47 @@ public class MySqlQueryValidator {
         }
     }
 
-    public void checkConnectionIsValid(Connection connection) {
-        if (connection == null) {
-            throw new ConnectionException("Connection cannot be null!");
-        }
+    public void checkConnection(Connection connection) {
+        checkConnectionIsNull(connection);
         try {
-            if (connection.isClosed() || connection.isReadOnly()) {
-                throw new ConnectionException("Connection cannot be closed or read-only!");
-            }
+            checkConnectionIsClosedOrReadOnly(connection);
+            checkConnectionIsValid(connection);
         } catch (Exception exception) {
             throw new ConnectionException("Error while validating connection! " + exception.getMessage());
         }
     }
 
     public void checkJobApplicationIsValid(JobApplication jobApplication) {
-        if (jobApplication == null) {
-            throw new InvalidRequiredParametersException("Job Application instance cannot be null!");
-        }
+        checkJobApplicationIsNull(jobApplication);
         checkJobNameAgainstConstraints(jobApplication);
         checkCompanyNameAgainstConstraints(jobApplication);
         checkUrlAgainstConstraints(jobApplication);
         checkTimestamp(jobApplication);
+    }
+
+    private void checkConnectionIsNull(Connection connection) {
+        if (connection == null) {
+            throw new ConnectionException("Connection cannot be null!");
+        }
+    }
+
+    private void checkConnectionIsClosedOrReadOnly(Connection connection) throws SQLException {
+        if (connection.isClosed() || connection.isReadOnly()) {
+            throw new ConnectionException("Connection cannot be closed or read-only!");
+        }
+    }
+
+    private void checkConnectionIsValid(Connection connection) throws SQLException {
+        int timeoutInSeconds = 20;
+        if (!connection.isValid(timeoutInSeconds)) {
+            throw new ConnectionException("Connection is not valid!");
+        }
+    }
+
+    private void checkJobApplicationIsNull(JobApplication jobApplication) {
+        if (jobApplication == null) {
+            throw new InvalidRequiredParametersException("Job Application instance cannot be null!");
+        }
     }
 
     private void checkJobNameAgainstConstraints(JobApplication jobApplication) {
