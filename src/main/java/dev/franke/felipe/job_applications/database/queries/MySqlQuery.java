@@ -2,6 +2,7 @@ package dev.franke.felipe.job_applications.database.queries;
 
 import dev.franke.felipe.job_applications.database.exception.SqlExecutionException;
 import dev.franke.felipe.job_applications.database.queries.validator.MySqlQueryValidator;
+import dev.franke.felipe.job_applications.database.queries.validator.StringValidator;
 import dev.franke.felipe.job_applications.domain.JobApplication;
 
 import java.sql.*;
