@@ -19,19 +19,19 @@ public record StringValidator(int maxLength, String theString, String stringDesc
         validator.assertStringDoesNotContainInvalidChars();
     }
 
-    public void assertStringIsNotNull() {
+    private void assertStringIsNotNull() {
         if (theString() == null) {
             throw new InvalidRequiredParametersException(stringDescription() + " value cannot be null!");
         }
     }
 
-    public void assertStringIsNotBlank() {
+    private void assertStringIsNotBlank() {
         if (theString().isBlank()) {
             throw new InvalidRequiredParametersException(stringDescription() + " value cannot be blank!");
         }
     }
 
-    public void assertStringDoesNotExceedMaxLength() {
+    private void assertStringDoesNotExceedMaxLength() {
         if (theString().length() >= maxLength()) {
             throw new InvalidRequiredParametersException(
                     stringDescription() + " value cannot exceed " + maxLength() + " chars!"
@@ -39,7 +39,7 @@ public record StringValidator(int maxLength, String theString, String stringDesc
         }
     }
 
-    public void assertStringDoesNotHaveFileOrDirPath() {
+    private void assertStringDoesNotHaveFileOrDirPath() {
         if (theString().contains("../") || theString().contains("..\\")) {
             throw new InvalidRequiredParametersException(
                     stringDescription() + " value cannot have file or directory path!!"
@@ -47,13 +47,13 @@ public record StringValidator(int maxLength, String theString, String stringDesc
         }
     }
 
-    public void assertStringDoesNotContainInvalidInput() {
+    private void assertStringDoesNotContainInvalidInput() {
         if (containsMaliciousInput(theString)) {
             throw new InvalidRequiredParametersException(stringDescription() + " value was considered dangerous!");
         }
     }
 
-    public void assertStringDoesNotContainInvalidChars() {
+    private void assertStringDoesNotContainInvalidChars() {
         if (containsMaliciousChar(theString)) {
             throw new InvalidRequiredParametersException(
                     stringDescription() + " value should no contain invalid chars!"
