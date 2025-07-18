@@ -19,6 +19,8 @@ do **maven-shade-plugin**, utilizado para criar um arquivo **.jar** contendo as 
 definir o caminho da classe principal que executa o programa.
 - **mysql-connector-j:** Permite uso do JDBC para conexão com o banco, incluindo os drivers necessários para conexão com o **MySQL**.
 - **MYSQL:** Banco de dados utilizado para persistência dos dados.
+- **JUnit5** Framework para testes unitários.
+- **Mockito** Para mockar classes e seus comportamentos durante a criação dos testes.
 
 ## Como executar este projeto
 
