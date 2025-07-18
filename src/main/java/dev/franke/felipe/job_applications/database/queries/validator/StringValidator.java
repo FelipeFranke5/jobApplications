@@ -64,6 +64,7 @@ public record StringValidator(int maxLength, String theString, String stringDesc
     private String[] maliciousPatterns() {
         return new String[]{
                 "DROP TABLE", "SELECT \\*", "INSERT INTO", "DELETE FROM",
+                "DATABASES", "sudo", "su", "ssh",
                 "USE", "bash -c", "sh -c", "cmd.exe", "eval", "\\$\\{", "eval\\{"
         };
     }
