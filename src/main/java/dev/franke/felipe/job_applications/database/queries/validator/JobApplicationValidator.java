@@ -14,9 +14,17 @@ public record JobApplicationValidator(JobApplication application) {
     }
 
     public void validateTimestamp() {
+        assertApplicationTimeNotNull();
+        assertApplicationTimeNotAfterNow();
+    }
+
+    private void assertApplicationTimeNotNull() {
         if (application().applicationTime() == null) {
             throw new InvalidRequiredParametersException("Timestamp is required! Cannot be null");
         }
+    }
+
+    private void assertApplicationTimeNotAfterNow() {
         if (application().applicationTime().isAfter(LocalDateTime.now())) {
             throw new InvalidRequiredParametersException(
                     String.format(
