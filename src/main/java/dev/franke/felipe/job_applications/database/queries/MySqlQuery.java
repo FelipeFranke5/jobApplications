@@ -2,7 +2,6 @@ package dev.franke.felipe.job_applications.database.queries;
 
 import dev.franke.felipe.job_applications.database.exception.SqlExecutionException;
 import dev.franke.felipe.job_applications.database.queries.validator.MySqlQueryValidator;
-import dev.franke.felipe.job_applications.database.queries.validator.StringValidator;
 import dev.franke.felipe.job_applications.domain.JobApplication;
 
 import java.sql.*;
@@ -22,7 +21,14 @@ public class MySqlQuery implements DatabaseQuery {
         try (PreparedStatement preparedStatement = connection.prepareStatement(filterByCompanyNameSqlString())) {
             return getJobApplications(companyName, preparedStatement);
         } catch (SQLException sqlException) {
-            throw new SqlExecutionException("Could not get Prepared Statement." + sqlException.getMessage());
+            throw new SqlExecutionException(
+                String.format(
+                    "Exception of type %s thrown while querying with message '%s' and code = %s", 
+                    "SqlExecutionException",
+                    sqlException.getMessage(),
+                    sqlException.getErrorCode()
+                )
+            );
         }
     }
 
@@ -30,11 +36,18 @@ public class MySqlQuery implements DatabaseQuery {
     public void insertJobApplication(Connection connection, JobApplication jobApplication) {
         VALIDATOR.checkConnection(connection);
         VALIDATOR.checkJobApplicationIsValid(jobApplication);
-        var sql = insertJobApplicationSqlString(jobApplication);
+        var sql = insertJobApplicationSqlString();
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            executeInsertion(jobApplication, preparedStatement);
+            int affectedRows = executeInsertion(jobApplication, preparedStatement);
+            VALIDATOR.checkNumberOfInsertionsIsGreaterThanZero(affectedRows);
         } catch (SQLException sqlException) {
-            throw new SqlExecutionException("Error while attempting to insert new record: " + sqlException.getMessage());
+            throw new SqlExecutionException(
+                String.format(
+                    "Could not insert values. SQL Message: %s - Code = %s",
+                    sqlException.getMessage(),
+                    sqlException.getErrorCode()
+                )
+            );
         }
     }
 
@@ -42,16 +55,23 @@ public class MySqlQuery implements DatabaseQuery {
         return "SELECT * FROM " + TABLE_NAME + " WHERE company_name = ?";
     }
 
-    private String insertJobApplicationSqlString(JobApplication jobApplication) {
+    private String insertJobApplicationSqlString() {
         return "INSERT INTO " + TABLE_NAME + "(job_name, company_name, url, application_time) VALUES (?, ?, ?, ?)";
     }
 
-    private List<JobApplication> getJobApplications(String companyName, PreparedStatement preparedStatement) throws SQLException {
-        int companyNameIndex = 1;
-        preparedStatement.setString(companyNameIndex, companyName);
-        try (ResultSet resultSet = preparedStatement.executeQuery()) {
+    private List<JobApplication> getJobApplications(String companyName, PreparedStatement preparedStatement) 
+    throws SQLException {
+        try (ResultSet resultSet = getQueryPreparedStatement(companyName, preparedStatement).executeQuery()) {
             return mapResultSetToArrayList(resultSet);
         }
+    }
+
+    private PreparedStatement getQueryPreparedStatement(
+        String companyName, PreparedStatement preparedStatement
+    ) throws SQLException {
+        int companyNameIndex = 1;
+        preparedStatement.setString(companyNameIndex, companyName);
+        return preparedStatement;
     }
 
     private List<JobApplication> mapResultSetToArrayList(ResultSet resultSet) throws SQLException {
@@ -71,7 +91,15 @@ public class MySqlQuery implements DatabaseQuery {
         );
     }
 
-    private void executeInsertion(JobApplication jobApplication, PreparedStatement preparedStatement) throws SQLException {
+    private int executeInsertion(JobApplication jobApplication, PreparedStatement preparedStatement) 
+    throws SQLException {
+        preparedStatement = updatePreparedStatement(jobApplication, preparedStatement);
+        return preparedStatement.executeUpdate();
+    }
+
+    private PreparedStatement updatePreparedStatement(
+        JobApplication jobApplication, PreparedStatement preparedStatement
+) throws SQLException {
         int jobNameIndex = 1;
         int companyNameIndex = 2;
         int urlIndex = 3;
@@ -80,7 +108,6 @@ public class MySqlQuery implements DatabaseQuery {
         preparedStatement.setString(companyNameIndex, jobApplication.companyName());
         preparedStatement.setString(urlIndex, jobApplication.url());
         preparedStatement.setTimestamp(applicationTimeIndex, Timestamp.from(Instant.now()));
-        int affectedRows = preparedStatement.executeUpdate();
-        VALIDATOR.checkNumberOfInsertionsIsGreaterThanZero(affectedRows);
+        return preparedStatement;
     }
 }
