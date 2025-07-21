@@ -36,10 +36,8 @@ public class MySqlQuery implements DatabaseQuery {
     public void insertJobApplication(Connection connection, JobApplication jobApplication) {
         VALIDATOR.checkConnection(connection);
         VALIDATOR.checkJobApplicationIsValid(jobApplication);
-        var sql = insertJobApplicationSqlString();
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            int affectedRows = executeInsertion(jobApplication, preparedStatement);
-            VALIDATOR.checkNumberOfInsertionsIsGreaterThanZero(affectedRows);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(insertJobApplicationSqlString())) {
+            VALIDATOR.checkNumberOfInsertionsIsGreaterThanZero(executeInsertion(jobApplication, preparedStatement));
         } catch (SQLException sqlException) {
             throw new SqlExecutionException(
                 String.format(
