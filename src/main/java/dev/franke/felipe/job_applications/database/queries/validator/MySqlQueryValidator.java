@@ -6,7 +6,7 @@ import dev.franke.felipe.job_applications.domain.JobApplication;
 
 import java.sql.Connection;
 
-public class MySqlQueryValidator {
+public class MySqlQueryValidator implements DatabaseValidator {
 
     private final static int JOB_NAME_MAX_LENGTH = 40;
     private final static String JOB_NAME_DESCRIPTION = "Job Name";
@@ -17,6 +17,7 @@ public class MySqlQueryValidator {
     private final static int URL_MAX_LENGTH = 1024;
     private final static String URL_DESCRIPTION = "URL";
 
+    @Override
     public void checkCompanyNameInQuery(String companyName) {
         StringValidator validator = StringValidator.getValidator(
                 COMPANY_NAME_MAX_LENGTH, companyName, COMPANY_NAME_DESCRIPTION
@@ -24,12 +25,14 @@ public class MySqlQueryValidator {
         StringValidator.validateField(validator);
     }
 
+    @Override
     public void checkNumberOfInsertionsIsGreaterThanZero(int affectedRows) {
         if (affectedRows <= 0) {
             throw new SqlExecutionException("Insertion not completed successfully!");
         }
     }
 
+    @Override
     public void checkConnection(Connection connection) {
         ConnectionValidator connectionValidator = new ConnectionValidator(connection);
         connectionValidator.assertNotNull();
@@ -47,6 +50,7 @@ public class MySqlQueryValidator {
         }
     }
 
+    @Override
     public void checkJobApplicationIsValid(JobApplication jobApplication) {
         JobApplicationValidator jobApplicationValidator = new JobApplicationValidator(jobApplication);
         jobApplicationValidator.assertNotNull();
