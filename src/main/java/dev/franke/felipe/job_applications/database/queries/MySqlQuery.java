@@ -1,7 +1,7 @@
 package dev.franke.felipe.job_applications.database.queries;
 
 import dev.franke.felipe.job_applications.database.exception.SqlExecutionException;
-import dev.franke.felipe.job_applications.database.queries.validator.MySqlQueryValidator;
+import dev.franke.felipe.job_applications.database.queries.validator.DatabaseValidator;
 import dev.franke.felipe.job_applications.domain.JobApplication;
 
 import java.sql.*;
@@ -12,12 +12,17 @@ import java.util.List;
 public class MySqlQuery implements DatabaseQuery {
 
     private static final String TABLE_NAME = "applications";
-    private static final MySqlQueryValidator VALIDATOR = new MySqlQueryValidator();
+
+    private DatabaseValidator validator;
+
+    public MySqlQuery(DatabaseValidator validator) {
+        this.validator = validator;
+    }
 
     @Override
     public List<JobApplication> getJobApplicationsByCompanyName(Connection connection, String companyName) {
-        VALIDATOR.checkConnection(connection);
-        VALIDATOR.checkCompanyNameInQuery(companyName);
+        validator.checkConnection(connection);
+        validator.checkCompanyNameInQuery(companyName);
         try (PreparedStatement preparedStatement = connection.prepareStatement(filterByCompanyNameSqlString())) {
             return getJobApplications(companyName, preparedStatement);
         } catch (SQLException sqlException) {
@@ -34,10 +39,10 @@ public class MySqlQuery implements DatabaseQuery {
 
     @Override
     public void insertJobApplication(Connection connection, JobApplication jobApplication) {
-        VALIDATOR.checkConnection(connection);
-        VALIDATOR.checkJobApplicationIsValid(jobApplication);
+        validator.checkConnection(connection);
+        validator.checkJobApplicationIsValid(jobApplication);
         try (PreparedStatement preparedStatement = connection.prepareStatement(insertJobApplicationSqlString())) {
-            VALIDATOR.checkNumberOfInsertionsIsGreaterThanZero(executeInsertion(jobApplication, preparedStatement));
+            validator.checkNumberOfInsertionsIsGreaterThanZero(executeInsertion(jobApplication, preparedStatement));
         } catch (SQLException sqlException) {
             throw new SqlExecutionException(
                 String.format(
