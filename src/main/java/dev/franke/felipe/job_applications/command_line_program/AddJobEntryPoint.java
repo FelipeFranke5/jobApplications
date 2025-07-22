@@ -3,6 +3,7 @@ package dev.franke.felipe.job_applications.command_line_program;
 import dev.franke.felipe.job_applications.command_line_program.exception.EntryPointException;
 import dev.franke.felipe.job_applications.database.queries.MySqlConnector;
 import dev.franke.felipe.job_applications.database.queries.MySqlQuery;
+import dev.franke.felipe.job_applications.database.queries.validator.MySqlQueryValidator;
 import dev.franke.felipe.job_applications.domain.JobApplication;
 
 import java.sql.Connection;
@@ -59,15 +60,15 @@ public class AddJobEntryPoint {
             databaseDriverOptionsMenu();
         }
         var credentials = getDatabaseCredentials();
-        performInsertion(credentials);
+        mySqlInsertion(credentials);
         databaseDriverOptionsMenu();
     }
 
-    private void performInsertion(ArrayList<String> credentials) {
+    private void mySqlInsertion(ArrayList<String> credentials) {
         var jobApplication = getJobApplication();
         var mySqlConnector = getSqlConnector(credentials);
         try (Connection connection = mySqlConnector.connect()) {
-            MySqlQuery mySqlQuery = new MySqlQuery();
+            MySqlQuery mySqlQuery = new MySqlQuery(new MySqlQueryValidator());
             mySqlQuery.insertJobApplication(connection, jobApplication);
             System.out.println("Added new application..");
         } catch (Exception exception) {
