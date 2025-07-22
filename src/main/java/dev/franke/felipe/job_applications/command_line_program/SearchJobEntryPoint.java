@@ -3,6 +3,7 @@ package dev.franke.felipe.job_applications.command_line_program;
 import dev.franke.felipe.job_applications.command_line_program.exception.EntryPointException;
 import dev.franke.felipe.job_applications.database.queries.MySqlConnector;
 import dev.franke.felipe.job_applications.database.queries.MySqlQuery;
+import dev.franke.felipe.job_applications.database.queries.validator.MySqlQueryValidator;
 import dev.franke.felipe.job_applications.domain.JobApplication;
 
 import java.sql.Connection;
@@ -67,7 +68,7 @@ public class SearchJobEntryPoint {
 
     private void printMySqlResults(MySqlConnector mySqlConnector, String companyName) {
         try (Connection connection = mySqlConnector.connect()) {
-            MySqlQuery mySqlQuery = new MySqlQuery();
+            MySqlQuery mySqlQuery = new MySqlQuery(new MySqlQueryValidator());
             var results = mySqlQuery.getJobApplicationsByCompanyName(connection, companyName);
             showMySqlResults(results);
             initializeMySqlSearch();
